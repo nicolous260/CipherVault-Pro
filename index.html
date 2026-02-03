@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CipherVault Pro - Advanced Client-Side Encryption Suite">
+    <title>CipherVault Pro | Secure Encryption</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <!-- Crypto Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body class="binary-bg">
+    <!-- Background Effects -->
+    <canvas id="matrixCanvas"></canvas>
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="brand">
+                <div class="logo">
+                    <div class="logo-pulse"></div>
+                    <div class="logo-border"></div>
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="brand-text">
+                    <h1 class="glitch" data-text="CIPHERVAULT">CIPHER<span class="highlight">VAULT</span></h1>
+                    <div class="status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">SYSTEM ONLINE</span>
+                        <span class="separator">|</span>
+                        <span id="clock" class="clock">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <button id="soundToggle" class="icon-btn" title="Toggle Sound">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <button id="fullscreenToggle" class="icon-btn" title="Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <div class="secure-badge">
+                    <i class="fas fa-lock"></i>
+                    <span>SECURE</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Application -->
+    <main class="app-container">
+        <!-- Stats Bar -->
+        <section class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-label">OPERATIONS</div>
+                <div class="stat-value" id="statCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">CHARACTERS</div>
+                <div class="stat-value cyan" id="statChars">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">STRENGTH</div>
+                <div class="stat-value" id="statStrength">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">CRACK TIME</div>
+                <div class="stat-value purple" id="statCrack">N/A</div>
+            </div>
+        </section>
+
+        <div class="app-grid">
+            <!-- Sidebar: Controls -->
+            <aside class="sidebar">
+                <!-- Mode Toggle -->
+                <div class="panel mode-toggle">
+                    <div class="mode-indicator" id="modeIndicator"></div>
+                    <button class="mode-btn active" data-mode="encrypt" id="btnEncrypt">
+                        <i class="fas fa-lock"></i> ENCRYPT
+                    </button>
+                    <button class="mode-btn" data-mode="decrypt" id="btnDecrypt">
+                        <i class="fas fa-unlock"></i> DECRYPT
+                    </button>
+                </div>
+
+                <!-- Security Panel -->
+                <div class="panel security-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-key"></i> Access Key</h3>
+                        <button id="generatePass" class="link-btn">
+                            <i class="fas fa-magic"></i> Generate
+                        </button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="password-wrapper">
+                            <input type="password" id="password" placeholder="Enter password..." autocomplete="off">
+                            <button class="toggle-visibility" data-target="password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="strength-meter">
+                        <div class="strength-header">
+                            <span>Complexity</span>
+                            <span id="strengthLabel">NONE</span>
+                        </div>
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <div class="requirements">
+                            <div class="req-item" data-req="length" title="8+ Characters">8+</div>
+                            <div class="req-item" data-req="upper" title="Uppercase">ABC</div>
+                            <div class="req-item" data-req="number" title="Numbers">123</div>
+                            <div class="req-item" data-req="symbol" title="Symbols">!@#</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div class="panel settings-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-cog"></i> Protocol</h3>
+                    </div>
+                    
+                    <div class="select-group">
+                        <label>Algorithm</label>
+                        <select id="algorithm">
+                            <option value="AES">AES-256-GCM (Military)</option>
+                            <option value="TripleDES">Triple DES (Legacy)</option>
+                            <option value="Rabbit">Rabbit (Stream)</option>
+                            <option value="RC4">RC4 (Drop)</option>
+                        </select>
+                    </div>
+
+                    <div class="format-toggle">
+                        <span>Format</span>
+                        <div class="toggle-group">
+                            <button class="format-btn active" data-format="json">JSON</button>
+                            <button class="format-btn" data-format="base64">B64</button>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="switch">
+                            <input type="checkbox" id="autoSave" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <span class="switch-label">Auto-save drafts</span>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="panel actions-panel">
+                    <button class="action-btn danger" id="clearAll">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                    <button class="action-btn" id="loadDemo">
+                        <i class="fas fa-flask"></i> Demo
+                    </button>
+                    <button class="action-btn" id="showHelp">
+                        <i class="fas fa-keyboard"></i> Help
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <section class="main-content">
+                <!-- Input Section -->
+                <div class="panel io-panel">
+                    <div class="io-header">
+                        <div class="io-title">
+                            <i class="fas fa-terminal"></i>
+                            <span>Input Stream</span>
+                        </div>
+                        <div class="io-meta">
+                            <span id="inputStats">0 chars</span>
+                            <button id="pasteBtn" class="icon-btn sm" title="Paste">
+                                <i class="fas fa-paste"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="io-body">
+                        <textarea id="inputText" placeholder="Enter data or drop files here..." spellcheck="false"></textarea>
+                        <div class="drop-zone" id="dropZone">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Drop file to encrypt</span>
+                        </div>
+                    </div>
+
+                    <div class="io-footer">
+                        <input type="file" id="fileInput" hidden multiple>
+                        <button class="btn secondary" id="attachBtn">
+                            <i class="fas fa-paperclip"></i> Attach File
+                        </button>
+                        <button class="btn primary" id="executeBtn">
+                            <i class="fas fa-bolt"></i> Execute
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Output Sidebar -->
+            <aside class="output-sidebar">
+                <div class="panel io-panel output">
+                    <div class="io-header">
+                        <div class="io-title">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Output</span>
+                        </div>
+                        <div class="io-actions">
+                            <button class="icon-btn sm" id="copyBtn" title="Copy">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="icon-btn sm" id="downloadBtn" title="Download">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="icon-btn sm" id="qrBtn" title="QR Code">
+                                <i class="fas fa-qrcode"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="io-body">
+                        <textarea id="outputText" readonly placeholder="Encrypted data will appear here..."></textarea>
+                    </div>
+
+                    <div class="hash-display">
+                        <div class="hash-header">
+                            <span>SHA-256</span>
+                            <button id="copyHash" class="icon-btn xs">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="hash-value" id="hashValue">--</div>
+                    </div>
+                </div>
+
+                <button class="btn gradient qr-generate" id="generateQR">
+                    <i class="fas fa-qrcode"></i> Generate QR
+                </button>
+
+                <!-- History Panel -->
+                <div class="panel history-panel">
+                    <div class="panel-header">
+                        <h3>History</h3>
+                        <button class="link-btn" id="clearHistory">Clear</button>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">No operations yet</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Mobile Controls -->
+    <div class="mobile-controls" id="mobileControls">
+        <div class="handle"></div>
+        <div class="mobile-actions">
+            <button class="mobile-btn primary" id="mobileExecute">
+                <i class="fas fa-bolt"></i>
+                <span>Execute</span>
+            </button>
+            <button class="mobile-btn" id="mobileCopy">
+                <i class="fas fa-copy"></i>
+                <span>Copy</span>
+            </button>
+            <button class="mobile-btn danger" id="mobileClear">
+                <i class="fas fa-trash"></i>
+                <span>Clear</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- QR Modal -->
+    <div class="modal" id="qrModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Share QR Code</h3>
+                <button class="close-btn" id="closeQR">&times;</button>
+            </div>
+            <canvas id="qrCanvas"></canvas>
+            <p class="modal-hint">Scan to receive encrypted data</p>
+            <button class="btn secondary" id="downloadQR">
+                <i class="fas fa-download"></i> Download QR
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="js/effects.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/crypto.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
